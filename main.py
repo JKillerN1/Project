@@ -24,7 +24,7 @@ def sport():
         window.deiconify()
         sportwindow.destroy()
 
-    sportframe.pack(anchor=NW)
+    sportframe.pack(anchor=CENTER)
 
     back = Button(
         sportframe,
