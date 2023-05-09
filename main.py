@@ -144,10 +144,12 @@ def family():
     win(familyw, "Family")
 
 
+
+
 def graf():
     grafwind = Tk()
     window.withdraw()
-    grafwind.title("Сфера жизни: Спорт")
+    grafwind.title("Графики")
     grafwind.geometry('800x400+{}+{}'.format(w // 2 - 400, h // 2 - 400))
 
     grafframe = Frame(
@@ -163,15 +165,21 @@ def graf():
         new_lst = {}
         with open(os.path.join("files", filename), 'r') as f:
             text = f.read()
-            for item in text.split('\n'):
-                new_lst[item.split(" ")[0]] = int(item.split(" ")[-1]) \
-                    if item.split(" ")[-1] in ['1','2','3'] else item.split(" ")[-1]
+            lines = sum(1 for line in text.split('\n'))
+            if lines>30:
+                tab=text.split('\n')[-30:]
+            else:
+                tab=text.split('\n')
+            for item in tab:
+                if len(item.split(" ")) > 1:
+                    new_lst[item.split(" ")[0]] = int(item.split(" ")[-2]) \
+                        if item.split(" ")[-2] in ['1','2','3'] else item.split(" ")[-2]
             spisok.append(new_lst)
+
 
     def draw(data):
         names = list(data.keys())
         values = list(data.values())
-
         with plt.rc_context({'xtick.color': 'white'}):
             fig, axs = plt.subplots(1, 2, figsize=(10, 3), sharey=True)
             axs[0].bar(names, values)
