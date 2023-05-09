@@ -12,7 +12,7 @@ window.title("дневник")
 columns = ("situation", "emotion", "think")
 
 def win(sportwindow, name_file):
-    sportwindow.geometry('800x400+{}+{}'.format(w // 2 - 400, h // 2 - 400))
+    sportwindow.geometry('1000x400+{}+{}'.format(w // 2 - 400, h // 2 - 400))
 
     sportframe = Frame(
         sportwindow,
@@ -176,7 +176,6 @@ def graf():
                         if item.split(" ")[-2] in ['1','2','3'] else item.split(" ")[-2]
             spisok.append(new_lst)
 
-
     def draw(data):
         names = list(data.keys())
         values = list(data.values())
@@ -236,6 +235,68 @@ def graf():
     grafwind.mainloop()
 
 
+
+
+
+def smile():
+    spisok = []
+    for filename in os.listdir("files"):
+        new_lst = {}
+        with open(os.path.join("files", filename), 'r') as f:
+            text = f.read()
+            lines = sum(1 for line in text.split('\n'))
+            if lines > 30:
+                tab = text.split('\n')[-30:]
+            else:
+                tab = text.split('\n')
+            for item in tab:
+                if len(item.split(" ")) > 1:
+                    new_lst[item.split(" ")[0]] = int(item.split(" ")[-2]) \
+                        if item.split(" ")[-2] in ['1', '2', '3'] else item.split(" ")[-2]
+            spisok.append(new_lst)
+    lst = [list(x.values()) for x in spisok]
+    all = []
+    for lstq in lst:
+        all.extend(lstq)
+    count1 = all.count(1)
+    count2 = all.count(2)
+    count3 = all.count(3)
+
+    maxall = max(count1,count2,count3)
+    if count1 == maxall:
+        sm = 'no.png'
+    else:
+        if count2 == maxall:
+            sm = 'so.png'
+        else:
+            sm = 'klass.png'
+
+    def resize_image(event):
+        new_width = event.width
+        new_height = event.height
+        image = copy_of_image.resize((new_width, new_height))
+        photo = ImageTk.PhotoImage(image)
+        label.config(image=photo)
+        label.image = photo
+
+    img = Image.open(sm)
+    copy_of_image = img.copy()
+    img = img.resize((200, 200), Image.LANCZOS)
+    #img = img.convert('L')
+    img = ImageTk.PhotoImage(img)
+    label = Label(window, image=img)
+    label.image = img
+    label.bind('<Configure>', resize_image)
+    label.pack()
+    #label.pack(side=LEFT)
+
+    window.mainloop()
+
+
+
+
+
+
 w = window.winfo_screenwidth()
 h = window.winfo_screenheight()
 
@@ -282,9 +343,10 @@ graphic = Button(
 )
 graphic.grid(row=4, column=1, pady=20)
 
-now = Label(
+now = Button(
     frame,
     text="Оценка текущего\nсостояния",
+    command=smile
 )
 now.grid(row=4, column=3)
 
