@@ -1,15 +1,28 @@
+import statistics
+import tkinter
 import tkinter as tk
 import os
+from functools import partial
 from tkinter import *
 from tkinter import ttk
 from PIL import ImageTk, Image
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg,
+NavigationToolbar2Tk)
+
+matplotlib.use('TkAgg')
+import numpy as np
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
 
 window = Tk()
 window.title("дневник")
 
 columns = ("situation", "emotion", "think")
+
 
 def win(sportwindow, name_file):
     sportwindow.geometry('1000x400+{}+{}'.format(w // 2 - 400, h // 2 - 400))
@@ -90,26 +103,29 @@ def win(sportwindow, name_file):
     mark_entry = Entry(input_frame)
     mark_entry.grid(row=1, column=4)
 
-    with open(f"files/{name_file}", "r") as f:
+    with open(f"files/{name_file}.txt", "r") as f:
         for i in f.readlines():
             set.insert(parent='', index='end', text='',
-                       values=i)
+                        values=i)
 
     def input_record():
+        if(int(mark_entry.get())<=2):
+            lable = Label(master=sportwindow, text='Вам следует обсудить эту ситуацию с психологом')
+            lable.pack()
         set.insert(parent='', index='end', text='',
                    values=(data_entry.get(), situation_entry.get(), emotion_entry.get(), think_entry.get(),
                            mark_entry.get()))
         sportdata.append([data_entry.get(), situation_entry.get(), emotion_entry.get(), think_entry.get(),
                           mark_entry.get()])
 
-        with open(f"files/{name_file}", "a") as f:
+        with open(f"files/{name_file}.txt", "a") as f:
             for x in sportdata:
                 for y in x:
                     f.write(y)
-                    f.write(" ")
+                    f.write("!")
                 f.write("\n")
 
-        data_entry.delete(0,END)
+        data_entry.delete(0, END)
         situation_entry.delete(0, END)
         emotion_entry.delete(0, END)
         think_entry.delete(0, END)
@@ -124,18 +140,19 @@ def win(sportwindow, name_file):
     sportwindow.mainloop()
 
 
-
 def sport():
     sportwindow = Tk()
     window.withdraw()
     sportwindow.title("Сфера жизни: Спорт")
-    win(sportwindow,"Sport")
+    win(sportwindow, "Sport")
+
 
 def life():
     lifew = Tk()
     window.withdraw()
     lifew.title("Сфера жизни: Личная жизнь")
-    win(lifew,"Life")
+    win(lifew, "Life")
+
 
 def family():
     familyw = Tk()
@@ -143,171 +160,368 @@ def family():
     familyw.title("Сфера жизни: Семья")
     win(familyw, "Family")
 
-
-
-
 def graf():
-    grafwind = Tk()
-    window.withdraw()
-    grafwind.title("Графики")
-    grafwind.geometry('800x400+{}+{}'.format(w // 2 - 400, h // 2 - 400))
+    grafwind = tk.Toplevel()
+    grafwind.attributes("-fullscreen", True)
+    lable = Label(master=grafwind, text="Отследите изменение вашего эмоционального состояния", font=("Arial", 24))
+    lable.pack()
 
-    grafframe = Frame(
+    def plot(file):
+        places = {'SportMood': [60,150],'FamilyMood': [620,150],'LifeMood': [1190,150],'All': [620,600]}
+
+        fig = Figure(figsize=(3, 3),
+                     dpi=100)
+
+        if file == 'All':
+            sport = list(map(int, open(f'files/SportMood.txt').read().split()))
+            life = list(map(int, open(f'files/LifeMood.txt').read().split()))
+            family = list(map(int, open(f'files/FamilyMood.txt').read().split()))
+            all = [sport, life, family]
+            data = list(map(statistics.mean, all))
+        else:
+            data = list(map(int, open(f'files/{file}.txt').read().split()))
+
+        plot1 = fig.add_subplot(111)
+
+        plot1.plot(data)
+        canvas = FigureCanvasTkAgg(fig,
+                                   master=grafwind)
+        canvas.draw()
+        canvas.get_tk_widget().place(x=places[file][0],y=places[file][1])
+
+        toolbar = NavigationToolbar2Tk(canvas,
+                                       grafwind)
+        toolbar.update()
+
+        canvas.get_tk_widget().place(x=places[file][0],y=places[file][1])
+
+    plot_button_sport = Button(master=grafwind,
+                         command=partial(plot, 'SportMood'),
+                         height=5,
+                         width=30,
+                         text="Plot sport")
+
+    plot_button_sport.place(x=100, y=50)
+
+    plot_button_family = Button(master=grafwind,
+                               command=partial(plot, 'FamilyMood'),
+                               height=5,
+                               width=30,
+                               text="Plot family")
+
+    plot_button_family.place(x=660, y=50)
+
+    plot_button_life = Button(master=grafwind,
+                               command=partial(plot, 'LifeMood'),
+                               height=5,
+                               width=30,
+                               text="Plot life")
+
+    plot_button_life.place(x=1225, y=50)
+
+    plot_button_all = Button(master=grafwind,
+                                command=partial(plot, 'All'),
+                                height=5,
+                                width=30,
+                                text="Plot all")
+
+    plot_button_all.place(x=660, y=500)
+
+    '''grafframe = Frame(
         grafwind,
         padx=10,
         pady=10
-    )
+    )'''
 
-    grafframe.pack(anchor=CENTER)
-
-    spisok = []
-    for filename in os.listdir("files"):
-        new_lst = {}
-        with open(os.path.join("files", filename), 'r') as f:
-            text = f.read()
-            lines = sum(1 for line in text.split('\n'))
-            if lines>30:
-                tab=text.split('\n')[-30:]
-            else:
-                tab=text.split('\n')
-            for item in tab:
-                if len(item.split(" ")) > 1:
-                    new_lst[item.split(" ")[0]] = int(item.split(" ")[-2]) \
-                        if item.split(" ")[-2] in ['1','2','3'] else item.split(" ")[-2]
-            spisok.append(new_lst)
-
-    def draw(data):
-        names = list(data.keys())
-        values = list(data.values())
-        with plt.rc_context({'xtick.color': 'white'}):
-            fig, axs = plt.subplots(1, 2, figsize=(10, 3), sharey=True)
-            axs[0].bar(names, values)
-            # axs[1].scatter(names, values)
-            axs[1].plot(names, values)
-        # fig.suptitle('Categorical Plotting')
-        plt.yticks(np.arange(1,4,1))
-        plt.show()
-
-
-    def sport_graf():
-        data = spisok[2]
-        draw(data)
-
-    def life_graf():
-        data = spisok[1]
-        draw(data)
-
-    def family_graf():
-        data = spisok[0]
-        draw(data)
-
-    sport1 = Button(
-        grafframe,
-        text='Спорт',
-        command=sport_graf
-    )
-    life1 = Button(
-        grafframe,
-        text='Личная жизнь',
-        command=life_graf
-    )
-    family11 = Button(
-        grafframe,
-        text='Семья',
-        command=family_graf
-    )
-
+    # grafframe.pack(anchor=CENTER)
     def close():
         window.deiconify()
         grafwind.destroy()
 
     back = Button(
-        grafframe,
+        grafwind,
         text='Назад',
+        font='Impact 10',
+        bg='black',
+        fg='white',
         command=close
     )
 
-    sport1.grid(row=2, column=1, padx=10)
+    back.place(x=w - 67, y=5)
+
+    '''sport1.grid(row=2, column=1, padx=10)
     life1.grid(row=2, column=2, padx=10)
     family11.grid(row=2, column=3, padx=10)
-    back.grid(row=2, column=0, padx=10)
+    back.grid(row=2, column=0, padx=10)'''
 
     grafwind.mainloop()
 
 
-
-
-
 def smile():
-    spisok = []
-    for filename in os.listdir("files"):
-        new_lst = {}
-        with open(os.path.join("files", filename), 'r') as f:
-            text = f.read()
-            lines = sum(1 for line in text.split('\n'))
-            if lines > 30:
-                tab = text.split('\n')[-30:]
-            else:
-                tab = text.split('\n')
-            for item in tab:
-                if len(item.split(" ")) > 1:
-                    new_lst[item.split(" ")[0]] = int(item.split(" ")[-2]) \
-                        if item.split(" ")[-2] in ['1', '2', '3'] else item.split(" ")[-2]
-            spisok.append(new_lst)
-    lst = [list(x.values()) for x in spisok]
-    all = []
-    for lstq in lst:
-        all.extend(lstq)
-    count1 = all.count(1)
-    count2 = all.count(2)
-    count3 = all.count(3)
+    # spisok = []
+    # for filename in os.listdir("files"):
+    #     new_lst = {}
+    #     with open(os.path.join("files", filename), 'r') as f:
+    #         text = f.read()
+    #         lines = sum(1 for line in text.split('\n'))
+    #         if lines > 30:
+    #             tab = text.split('\n')[-30:]
+    #         else:
+    #             tab = text.split('\n')
+    #         for item in tab:
+    #             if len(item.split(" ")) > 1:
+    #                 new_lst[item.split(" ")[0]] = int(item.split(" ")[-2]) \
+    #                     if item.split(" ")[-2] in ['1', '2', '3'] else item.split(" ")[-2]
+    #         spisok.append(new_lst)
+    # lst = [list(x.values()) for x in spisok]
+    # all = []
+    # for lstq in lst:
+    #     all.extend(lstq)
+    # count1 = all.count(1)
+    # count2 = all.count(2)
+    # count3 = all.count(3)
+    #
+    # maxall = max(count1,count2,count3)
+    # if count1 == maxall:
+    #     sm = 'images/no.png'
+    # else:
+    #     if count2 == maxall:
+    #         sm = 'images/so.png'
+    #     else:
+    #         sm = 'images/klass.png'
+    #
+    # def resize_image(event):
+    #     new_width = event.width
+    #     new_height = event.height
+    #     image = copy_of_image.resize((new_width, new_height))
+    #     photo = ImageTk.PhotoImage(image)
+    #     label.config(image=photo)
+    #     label.image = photo
+    #
+    # img = Image.open(sm)
+    # copy_of_image = img.copy()
+    # img = img.resize((200, 200), Image.LANCZOS)
+    # #img = img.convert('L')
+    # img = ImageTk.PhotoImage(img)
+    # label = Label(window, image=img)
+    # label.image = img
+    # #label.bind('<Configure>', resize_image)
+    # label.pack()
+    # label.pack(side=LEFT)
 
-    maxall = max(count1,count2,count3)
-    if count1 == maxall:
-        sm = 'no.png'
-    else:
-        if count2 == maxall:
-            sm = 'so.png'
-        else:
-            sm = 'klass.png'
+    # imageHead = img
+    # imageHand = Image.open('images/so.png')
+    #
+    # imageHead.paste(imageHand, (20, 40), imageHand)
+    # # Convert the Image object into a TkPhoto object
+    # tkimage = ImageTk.PhotoImage(imageHead)
+    #
+    # panel1 = Label(window, image=tkimage)
+    # panel1.grid(row=0, column=2, sticky=E)
+    moodrate = tk.Toplevel()
+    window.withdraw()
+    moodrate.attributes('-fullscreen', True)
+    moodrate.title("Оценка состояния")
+    moodrate.resizable(0, 0)
 
-    def resize_image(event):
-        new_width = event.width
-        new_height = event.height
-        image = copy_of_image.resize((new_width, new_height))
-        photo = ImageTk.PhotoImage(image)
-        label.config(image=photo)
-        label.image = photo
+    def close():
+        moodrate.destroy()
+        window.deiconify()
 
-    img = Image.open(sm)
-    copy_of_image = img.copy()
-    img = img.resize((200, 200), Image.LANCZOS)
-    #img = img.convert('L')
-    img = ImageTk.PhotoImage(img)
-    label = Label(window, image=img)
-    label.image = img
-    label.bind('<Configure>', resize_image)
+    label = Label(moodrate, text="Оцените ваше текущее состояние в сфере:", font=("Arial", 24))
     label.pack()
-    #label.pack(side=LEFT)
 
-    window.mainloop()
+    def addmood(num,file):
+        f = open(f'files/{file}Mood.txt', 'a')
+        f.write(f'{num} ')
+        f.close()
+
+    back = Button(
+        moodrate,
+        text='Назад',
+        font='Impact 10',
+        bg='black',
+        fg='white',
+        command=close
+    )
+    back.place(x=w - 67, y=5)
+
+    imgcalm = PhotoImage(file='images/calm.png').subsample(2, 2)
+    imgangry = PhotoImage(file='images/angry.png').subsample(2, 2)
+    imgcool = PhotoImage(file='images/cool.png').subsample(2, 2)
+    imghappy = PhotoImage(file='images/happy.png').subsample(2, 2)
+    imgsad = PhotoImage(file='images/sad.png').subsample(2, 2)
+
+    lable_sport = Label(moodrate, text="Спорт", font=("Arial", 20))
+    lable_life = Label(moodrate, text="Личная жизнь", font=("Arial", 20))
+    lable_family = Label(moodrate, text="Семья", font=("Arial", 20))
+
+    lable_sport.place(x=150, y=100)
+    lable_life.place(x=680, y=100)
+    lable_family.place(x=1300, y=100)
 
 
 
+    angry = Button(
+        moodrate,
+        image=imgangry,
+        command=partial(addmood,'1','Sport')
+    )
+
+    angry.place(x=110,y=140)
+
+    angry = Button(
+        moodrate,
+        image=imgangry,
+        command=partial(addmood, '1', 'Life')
+    )
+
+    angry.place(x=690, y=140)
+
+    angry = Button(
+        moodrate,
+        image=imgangry,
+        command=partial(addmood, '1', 'Family')
+    )
+
+    angry.place(x=1265, y=140)
+
+    sad = Button(
+        moodrate,
+        image=imgsad,
+        command=partial(addmood,'2','Sport')
+    )
+
+    sad.place(x=110, y=320)
+
+    sad = Button(
+        moodrate,
+        image=imgsad,
+        command=partial(addmood, '2', 'Life')
+    )
+
+    sad.place(x=690, y=320)
+
+    sad = Button(
+        moodrate,
+        image=imgsad,
+        command=partial(addmood, '2', 'Family')
+    )
+
+    sad.place(x=1265, y=320)
+
+    calm = Button(
+        moodrate,
+        image=imgcalm,
+        command=partial(addmood,'3', 'Sport')
+    )
+
+    calm.place(x=110, y=320)
+
+    calm = Button(
+        moodrate,
+        image=imgcalm,
+        command=partial(addmood, '3', 'Life')
+    )
+
+    calm.place(x=690, y=320)
+
+    calm = Button(
+        moodrate,
+        image=imgcalm,
+        command=partial(addmood, '3', 'Family')
+    )
+
+    calm.place(x=1265, y=320)
 
 
+    cool = Button(
+        moodrate,
+        image=imgcool,
+        command=partial(addmood,'4', 'Sport')
+    )
 
+    cool.place(x=110, y=500)
+
+    cool = Button(
+        moodrate,
+        image=imgcool,
+        command=partial(addmood, '4', 'Life')
+    )
+
+    cool.place(x=690, y=500)
+
+    cool = Button(
+        moodrate,
+        image=imgcool,
+        command=partial(addmood, '4', 'Family')
+    )
+
+    cool.place(x=1265, y=500)
+
+    happy = Button(
+        moodrate,
+        image=imghappy,
+        command=partial(addmood,'5', 'Sport')
+    )
+
+    happy.place(x=110, y=680)
+
+    happy = Button(
+        moodrate,
+        image=imghappy,
+        command=partial(addmood, '5', 'Life')
+    )
+
+    happy.place(x=690, y=680)
+
+    happy = Button(
+        moodrate,
+        image=imghappy,
+        command=partial(addmood, '5', 'Family')
+    )
+
+    happy.place(x=1265, y=680)
+
+    moodrate.mainloop()
+
+
+def close():
+    window.destroy()
+
+
+'''def set_image(name):
+    canvas.delete("all")
+    #canvas.create_image(100, 115, image=image)
+    img = Image.open(name)
+    img.thumbnail((200, 200), Image.ANTIALIAS)
+    return ImageTk.PhotoImage(img)
+
+def set():
+    set_image('фонjpeg.jpeg')
+
+'''
 w = window.winfo_screenwidth()
 h = window.winfo_screenheight()
 
-window.geometry('400x400+{}+{}'.format(w // 2 - 200, h // 2 - 200))
+window.attributes("-fullscreen", True)
 
-frame = Frame(
+# canvas=Canvas(window,width=w,height=h)
+# canvas.config(bg="#848470")
+# canvas.pack()
+# img = Image.open("images\фонjpeg.jpeg")
+# img = img.resize((w,h),Image.LANCZOS)
+# img = ImageTk.PhotoImage(img)
+# canvas.create_image(0, 0, image=img, anchor="nw")
+# window.geometry(f"{w}x{h}+0+0")
+
+
+'''frame = Frame(
     window,
     padx=10,
     pady=10
 )
-frame.pack(expand=True)
+frame.pack(expand=True)'''
 
 '''newnote = Label(
     frame,
@@ -315,54 +529,75 @@ frame.pack(expand=True)
 )
 newnote.grid(row=1, column=2)'''
 
+#    #000064 - синий
+
 sport = Button(
-    frame,
+    window,
     text='Спорт',
+    bg='#FF0000',
+    font='Impact 20',
+    fg='black',
     command=sport
 )
 personallife = Button(
-    frame,
+    window,
     text='Личная жизнь',
+    bg='#00FF00',
+    font='Impact 20',
+    fg='black',
     command=life
 )
 
 family = Button(
-    frame,
+    window,
     text='Семья',
+    bg='#FFFF00',
+    font='Impact 20',
+    fg='black',
     command=family
 )
 
-sport.grid(row=2, column=1, padx=10)
+'''sport.grid(row=2, column=1, padx=10)
 personallife.grid(row=2, column=2, padx=10)
-family.grid(row=2, column=3, padx=10)
+family.grid(row=2, column=3, padx=10)'''
 
 graphic = Button(
-    frame,
+    window,
     text='График',
+    font='Impact 18',
+    bg='black',
+    fg='white',
     command=graf
 )
-graphic.grid(row=4, column=1, pady=20)
+# graphic.grid(row=4, column=1, pady=20)
 
 now = Button(
-    frame,
+    window,
     text="Оценка текущего\nсостояния",
+    font='Impact 18',
+    bg='black',
+    fg='white',
+    # command=set
     command=smile
 )
-now.grid(row=4, column=3)
+# now.grid(row=4, column=3)
+
+close = Button(
+    window,
+    text="Закрыть",
+    font='Impact 10',
+    bg='black',
+    fg='white',
+    command=close
+)
+# now.grid(row=w, column=h)
+
+
+sport.place(x=25, y=50)
+family.place(x=25, y=150)
+personallife.place(x=25, y=250)
+graphic.place(x=10, y=h - 175)
+now.place(x=10, y=h - 100)
+close.place(x=w - 67, y=5)
 
 window.mainloop()
-
-
-
-'''spisok=[]
-for filename in os.listdir("files"):
-    new_lst={}
-    with open(os.path.join("files", filename), 'r') as f:
-        text = f.read()
-        for item in text.split('\n'):
-            new_lst[item.split(" ")[0]]=item.split(" ")[-1]
-            print(int(item.split(" ")[-1]) if item.split(" ")[-1] in ['1','2','3'] else item.split(" ")[-1])
-
-        spisok.append(new_lst)
-print(spisok)
-'''
