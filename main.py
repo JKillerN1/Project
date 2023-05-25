@@ -1,18 +1,45 @@
+import statistics
+import tkinter
 import tkinter as tk
 import os
+from functools import partial
 from tkinter import *
 from tkinter import ttk
 from PIL import ImageTk, Image
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg,
+NavigationToolbar2Tk)
+
+matplotlib.use('TkAgg')
+import numpy as np
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
 
 window = Tk()
 window.title("дневник")
 
 columns = ("situation", "emotion", "think")
 
+from tksheet import Sheet
+import tkinter as tk
+import textwrap
+
+
+
+
+'''def wrap(string, lenght=32):
+    return '\n'.join(textwrap.wrap(string, lenght))
+
+
 def win(sportwindow, name_file):
-    sportwindow.geometry('1000x400+{}+{}'.format(w // 2 - 400, h // 2 - 400))
+    sportwindow.geometry('1000x1000+{}+{}'.format(w // 2 - 400, h // 2 - 400))
+    s = ttk.Style(sportwindow)
+    s.theme_use('clam')
+    s.configure('Treeview', rowheight= 50)
+
 
     sportframe = Frame(
         sportwindow,
@@ -34,7 +61,7 @@ def win(sportwindow, name_file):
 
     back.grid(row=1, column=1)
 
-    set = ttk.Treeview(sportwindow)
+    set = ttk.Treeview(sportwindow, height = 10)
     set.pack()
 
     set['columns'] = ('data', 'situation', 'emotion', 'think', 'mark')
@@ -54,8 +81,8 @@ def win(sportwindow, name_file):
 
     sportdata = []
 
-    '''for data in sportdata:
-        set.insert(parent='', index='end', text='', values=(data[0], data[1], data[2], data[3]))'''
+    #for data in sportdata:
+     #   set.insert(parent='', index='end', text='', values=(data[0], data[1], data[2], data[3]))
 
     input_frame = Frame(sportwindow)
     input_frame.pack()
@@ -93,9 +120,13 @@ def win(sportwindow, name_file):
     with open(f"files/{name_file}", "r") as f:
         for i in f.readlines():
             set.insert(parent='', index='end', text='',
-                       values=i)
+                        values=list(map(wrap,i.split('!'))))
+            #print(list(map(wrap,i.split('!'))))
 
     def input_record():
+        if(int(mark_entry.get())<=2):
+            lable = Label(master=sportwindow, text='Вам следует обсудить эту ситуацию с психологом')
+            lable.pack()
         set.insert(parent='', index='end', text='',
                    values=(data_entry.get(), situation_entry.get(), emotion_entry.get(), think_entry.get(),
                            mark_entry.get()))
@@ -106,10 +137,10 @@ def win(sportwindow, name_file):
             for x in sportdata:
                 for y in x:
                     f.write(y)
-                    f.write(" ")
+                    f.write("!")
                 f.write("\n")
 
-        data_entry.delete(0,END)
+        data_entry.delete(0, END)
         situation_entry.delete(0, END)
         emotion_entry.delete(0, END)
         think_entry.delete(0, END)
@@ -122,192 +153,660 @@ def win(sportwindow, name_file):
     sportwindow.protocol("WM_DELETE_WINDOW", window.deiconify())
 
     sportwindow.mainloop()
+    '''
+
+class demo(tk.Tk):
+    def __init__(self, name):
+        tk.Tk.__init__(self)
+        self.grid_columnconfigure(0, weight = 1)
+        self.grid_rowconfigure(0, weight = 1)
+        self.frame = tk.Frame(self)
+        self.frame.grid_columnconfigure(0, weight = 1)
+        self.frame.grid_rowconfigure(0, weight = 1)
+        self.data = ([[c for c in open(f'files/{name}').read().split("\n")[(r*5+r)-6:r*6-1]]
+                                   for r in range(1,open(f'files/{name}').read().split("\n").count('')+1)])
+        self.header = (['Дата','Ситуация','Эмоции','Мысли','Оценка'])
+        self.sheet = Sheet(self.frame,
+                           data=self.data,
+                           #theme="dark",
+                           header_bg='#566F5F',
+                           header_fg='#4D220E',
+                           table_bg='#D1C1B4',
+                           table_fg='#4D220E',
+                           font ="Arial 14",
+                           header_font="Impact 18",
+                           #height=100,
+                           empty_horizontal=1,
+                           column_width=295,
+                           empty_vertical=100,
+                           expand_sheet_if_paste_too_big=True,
+                           header_height='3',
+                           max_column_width='200',
+                           row_height='5',
+                           headers=self.header
+                           )
+        #self.sheet.font(newfont=None)
+        '''self.data =([[c for c in open(f'files/{name}').read().split("\n")[(r*5+r)-6:r*6-1]]
+                                   for r in range(1,open('files/Sport').read().split("\n").count('')+1)])
+        self.sheet = Sheet(self.frame,
+                           data = self.data,
+                           show_y_scrollbar = False,
+                           #width=1025,
+                           height=100,
+                           empty_horizontal=1,
+                           column_width=300 =()
+                           empty_vertical=100,
+                           expand_sheet_if_paste_too_big=True,
+                           header_height='3',
+                           max_column_width='200',
+                           row_height='5',
+                           headers=['Дата',
+                            'Ситуация',
+                            'Эмоции',
+                            'Мысли',
+                            'Оценка']
+                           )'''
+
+        #self.sheet.set_row_data(r, values=tuple(), add_columns=True, redraw=False)
+        #self.sheet.insert_rows(rows: Union[list, int] = 1,
+         #   idx: Union[str, int] = "end", 
+          #  heights = None,
+           # deselect_all = False,
+            #add_columns = True,
+            #mod_row_positions = True,
+            #redraw = True)
+
+        self.sheet.enable_bindings()
+        self.frame.grid(row=0, column=0, sticky="nswe")
+        self.sheet.grid(row=0, column=0, sticky="nswe")
+
+        '''self.sheet.highlight_cells(0,5,
+                                   bg='#DEB28D',
+                                   fg="white")'''
+
+        #self.sheet.set_all_cell_sizes_to_text()
+
+        #self.show_selections = tk.Label(self)
+
+        self.sheet.create_header_dropdown(c=4,
+                                          values=[ "1", "2", "3"],
+                                          set_value="all",
+                                          selection_function=self.header_dropdown_selected,
+                                          text="Оценка"
+                                          )
+
+
+    def header_dropdown_selected(self, event=None):
+        hdrs = self.sheet.headers()
+
+        hdrs[event.column] = event.text
+
+        '''for dd in hdrs:
+            if dd =="all":
+                print(111111111)
+                r = [rn for rn, row in enumerate(self.data) ]
+                self.sheet.display_rows(rows=[2, 4, 7], all_displayed = False)
+
+
+
+        else:'''
+        rows = [rn for rn, row in enumerate(self.data) if hdrs[event.column]==row[-1]]
+
+        self.sheet.display_rows(rows=rows,
+                                all_displayed=False)
+        self.sheet.redraw()
+
+
+
+
+
+
+
+def wr(app,name):
+    aaa = app.sheet.get_sheet_data(get_displayed=False,
+                                   get_header=False,
+                                   get_index=False,
+                                   get_index_displayed=True,
+                                   get_header_displayed=True,
+                                   only_rows=None,
+                                   only_columns=None)
+
+    with open(f"files/{name}", "w") as f:
+        for i in aaa:
+            if i != [] and i != ['']:
+                for k in i:
+                    f.write(k)
+                    f.write('\n')
+                f.write('\n')
 
 
 
 def sport():
-    sportwindow = Tk()
+    '''sportwindow = Tk()
     window.withdraw()
     sportwindow.title("Сфера жизни: Спорт")
-    win(sportwindow,"Sport")
+    win(sportwindow, "Sport")
+    '''
+
+    app = demo("Sport")
+   # print(wr(app, "Sport"))
+    #print(wr(app, "Sport"))
+    app.attributes("-fullscreen", True)
+
+    def close():
+        #window.deiconify()
+        app.destroy()
+
+    back = Button(
+        app,
+        text='Назад',
+        font='Impact 10',
+        bg='#D1C1B4',
+        fg='white',
+        command=close
+    )
+
+
+    back.place(x=w - 77, y=47)
+
+    #print(wr(app, "Sport"))
+    app.mainloop()
+    wr(app, "Sport")
+    #app.destroy()
+    #print(wr(app, "Sport"))
+
+
+
+
 
 def life():
-    lifew = Tk()
+    '''lifew = Tk()
     window.withdraw()
     lifew.title("Сфера жизни: Личная жизнь")
-    win(lifew,"Life")
+    win(lifew, "Life")'''
+    app = demo("Life")
+    app.attributes("-fullscreen", True)
+
+    def close():
+        # window.deiconify()
+        app.destroy()
+
+    back = Button(
+        app,
+        text='Назад',
+        font='Impact 10',
+        bg='#D1C1B4',
+        fg='white',
+        command=close
+    )
+
+    back.place(x=w - 77, y=47)
+    app.mainloop()
+    wr(app,"Life")
+
 
 def family():
-    familyw = Tk()
+    '''familyw = Tk()
     window.withdraw()
     familyw.title("Сфера жизни: Семья")
-    win(familyw, "Family")
+    win(familyw, "Family")'''
+    app = demo("Family")
+    app.attributes("-fullscreen", True)
 
+    def close():
+        # window.deiconify()
+        app.destroy()
 
+    back = Button(
+        app,
+        text='Назад',
+        font='Impact 10',
+        bg='#D1C1B4',
+        fg='white',
+        command=close
+    )
+
+    back.place(x=w - 77, y=47)
+    app.mainloop()
+    wr(app,"Family")
 
 
 def graf():
-    grafwind = Tk()
-    window.withdraw()
-    grafwind.title("Графики")
-    grafwind.geometry('800x400+{}+{}'.format(w // 2 - 400, h // 2 - 400))
+    grafwind = tk.Toplevel()
+    grafwind.attributes("-fullscreen", True)
+    grafwind['bg'] = '#D1C1B4'
+    lable = Label(master=grafwind, text="Отследите изменение вашего эмоционального состояния",
+                  font=("Impact", 24),
+                  bg='#D1C1B4',fg='#4D220E')
+    lable.pack()
 
-    grafframe = Frame(
+    def plot(file):
+        places = {'SportMood': [50,150],'FamilyMood': [610,150],'LifeMood': [1180,150],'All': [610,565]}
+
+        fig = Figure(figsize=(3, 3),
+                     dpi=100,facecolor='#D1C1B4')
+
+        if file == 'All':
+            sport = list(map(int, open(f'files/SportMood').read().split()))
+            life = list(map(int, open(f'files/LifeMood').read().split()))
+            family = list(map(int, open(f'files/FamilyMood').read().split()))
+            all = [sport, life, family]
+            for i in all:
+                if i==[]:
+                    all.remove(i)
+            data = list(map(statistics.mean, all))
+            #print(data)
+        else:
+            data = list(map(int, open(f'files/{file}').read().split()))
+
+        plot1 = fig.add_subplot(111)
+
+        plot1.plot(data)
+        canvas = FigureCanvasTkAgg(fig,
+                                   master=grafwind)
+        canvas.draw()
+        #canvas.get_tk_widget().configure(bg='black')
+        canvas.get_tk_widget().place(x=places[file][0],y=places[file][1])
+
+        '''toolbar = NavigationToolbar2Tk(canvas,
+                                      grafwind)
+        toolbar.set_message(False)
+        toolbar.config(background='black')
+        toolbar._message_label.config(background='black')
+        toolbar.lift()
+        toolbar.pack(side=tk.X)
+
+
+        toolbar.update()'''
+
+        #canvas.get_tk_widget().place(x=places[file][0],y=places[file][1])
+
+    plot_button_sport = Button(master=grafwind,
+                         command=partial(plot, 'SportMood'),
+                               height=2,
+                               width=15,
+                               bg='#DEB28D',
+                               font='Impact 20',
+                               fg='#4D220E',
+                         text="Plot sport")
+
+    plot_button_sport.place(x=100, y=50)
+
+    plot_button_family = Button(master=grafwind,
+                               command=partial(plot, 'FamilyMood'),
+                                height=2,
+                                width=15,
+                                bg='#DEB28D',
+                                font='Impact 20',
+                                fg='#4D220E',
+                               text="Plot family")
+
+    plot_button_family.place(x=660, y=50)
+
+    plot_button_life = Button(master=grafwind,
+                               command=partial(plot, 'LifeMood'),
+                              height=2,
+                              width=15,
+                              bg='#DEB28D',
+                              font='Impact 20',
+                              fg='#4D220E',
+                               text="Plot life")
+
+    plot_button_life.place(x=1225, y=50)
+
+    plot_button_all = Button(master=grafwind,
+                                command=partial(plot, 'All'),
+                             height=2,
+                             width=15,
+                             bg='#DEB28D',
+                             font='Impact 20',
+                             fg='#4D220E',
+                                text="Plot all")
+
+    plot_button_all.place(x=660, y=475)
+
+    '''grafframe = Frame(
         grafwind,
         padx=10,
         pady=10
-    )
+    )'''
 
-    grafframe.pack(anchor=CENTER)
-
-    spisok = []
-    for filename in os.listdir("files"):
-        new_lst = {}
-        with open(os.path.join("files", filename), 'r') as f:
-            text = f.read()
-            lines = sum(1 for line in text.split('\n'))
-            if lines>30:
-                tab=text.split('\n')[-30:]
-            else:
-                tab=text.split('\n')
-            for item in tab:
-                if len(item.split(" ")) > 1:
-                    new_lst[item.split(" ")[0]] = int(item.split(" ")[-2]) \
-                        if item.split(" ")[-2] in ['1','2','3'] else item.split(" ")[-2]
-            spisok.append(new_lst)
-
-    def draw(data):
-        names = list(data.keys())
-        values = list(data.values())
-        with plt.rc_context({'xtick.color': 'white'}):
-            fig, axs = plt.subplots(1, 2, figsize=(10, 3), sharey=True)
-            axs[0].bar(names, values)
-            # axs[1].scatter(names, values)
-            axs[1].plot(names, values)
-        # fig.suptitle('Categorical Plotting')
-        plt.yticks(np.arange(1,4,1))
-        plt.show()
-
-
-    def sport_graf():
-        data = spisok[2]
-        draw(data)
-
-    def life_graf():
-        data = spisok[1]
-        draw(data)
-
-    def family_graf():
-        data = spisok[0]
-        draw(data)
-
-    sport1 = Button(
-        grafframe,
-        text='Спорт',
-        command=sport_graf
-    )
-    life1 = Button(
-        grafframe,
-        text='Личная жизнь',
-        command=life_graf
-    )
-    family11 = Button(
-        grafframe,
-        text='Семья',
-        command=family_graf
-    )
-
+    # grafframe.pack(anchor=CENTER)
     def close():
         window.deiconify()
         grafwind.destroy()
 
     back = Button(
-        grafframe,
+        grafwind,
         text='Назад',
+        font='Impact 10',
+        bg='#DEB28D',
+        fg='#4D220E',
         command=close
     )
 
-    sport1.grid(row=2, column=1, padx=10)
+    back.place(x=w - 67, y=5)
+
+    '''sport1.grid(row=2, column=1, padx=10)
     life1.grid(row=2, column=2, padx=10)
     family11.grid(row=2, column=3, padx=10)
-    back.grid(row=2, column=0, padx=10)
+    back.grid(row=2, column=0, padx=10)'''
 
     grafwind.mainloop()
 
 
-
-
-
 def smile():
-    spisok = []
-    for filename in os.listdir("files"):
-        new_lst = {}
-        with open(os.path.join("files", filename), 'r') as f:
-            text = f.read()
-            lines = sum(1 for line in text.split('\n'))
-            if lines > 30:
-                tab = text.split('\n')[-30:]
-            else:
-                tab = text.split('\n')
-            for item in tab:
-                if len(item.split(" ")) > 1:
-                    new_lst[item.split(" ")[0]] = int(item.split(" ")[-2]) \
-                        if item.split(" ")[-2] in ['1', '2', '3'] else item.split(" ")[-2]
-            spisok.append(new_lst)
-    lst = [list(x.values()) for x in spisok]
-    all = []
-    for lstq in lst:
-        all.extend(lstq)
-    count1 = all.count(1)
-    count2 = all.count(2)
-    count3 = all.count(3)
+    # spisok = []
+    # for filename in os.listdir("files"):
+    #     new_lst = {}
+    #     with open(os.path.join("files", filename), 'r') as f:
+    #         text = f.read()
+    #         lines = sum(1 for line in text.split('\n'))
+    #         if lines > 30:
+    #             tab = text.split('\n')[-30:]
+    #         else:
+    #             tab = text.split('\n')
+    #         for item in tab:
+    #             if len(item.split(" ")) > 1:
+    #                 new_lst[item.split(" ")[0]] = int(item.split(" ")[-2]) \
+    #                     if item.split(" ")[-2] in ['1', '2', '3'] else item.split(" ")[-2]
+    #         spisok.append(new_lst)
+    # lst = [list(x.values()) for x in spisok]
+    # all = []
+    # for lstq in lst:
+    #     all.extend(lstq)
+    # count1 = all.count(1)
+    # count2 = all.count(2)
+    # count3 = all.count(3)
+    #
+    # maxall = max(count1,count2,count3)
+    # if count1 == maxall:
+    #     sm = 'images/no.png'
+    # else:
+    #     if count2 == maxall:
+    #         sm = 'images/so.png'
+    #     else:
+    #         sm = 'images/klass.png'
+    #
+    # def resize_image(event):
+    #     new_width = event.width
+    #     new_height = event.height
+    #     image = copy_of_image.resize((new_width, new_height))
+    #     photo = ImageTk.PhotoImage(image)
+    #     label.config(image=photo)
+    #     label.image = photo
+    #
+    # img = Image.open(sm)
+    # copy_of_image = img.copy()
+    # img = img.resize((200, 200), Image.LANCZOS)
+    # #img = img.convert('L')
+    # img = ImageTk.PhotoImage(img)
+    # label = Label(window, image=img)
+    # label.image = img
+    # #label.bind('<Configure>', resize_image)
+    # label.pack()
+    # label.pack(side=LEFT)
 
-    maxall = max(count1,count2,count3)
-    if count1 == maxall:
-        sm = 'no.png'
-    else:
-        if count2 == maxall:
-            sm = 'so.png'
-        else:
-            sm = 'klass.png'
+    # imageHead = img
+    # imageHand = Image.open('images/so.png')
+    #
+    # imageHead.paste(imageHand, (20, 40), imageHand)
+    # # Convert the Image object into a TkPhoto object
+    # tkimage = ImageTk.PhotoImage(imageHead)
+    #
+    # panel1 = Label(window, image=tkimage)
+    # panel1.grid(row=0, column=2, sticky=E)
+    moodrate = tk.Toplevel()
+    #window.withdraw()
+    moodrate.attributes('-fullscreen', True)
+    moodrate['bg'] = '#D1C1B4'
+    moodrate.title("Оценка состояния")
+    moodrate.resizable(0, 0)
 
-    def resize_image(event):
-        new_width = event.width
-        new_height = event.height
-        image = copy_of_image.resize((new_width, new_height))
-        photo = ImageTk.PhotoImage(image)
-        label.config(image=photo)
-        label.image = photo
+    def close():
+        moodrate.destroy()
+        #window.deiconify()
 
-    img = Image.open(sm)
-    copy_of_image = img.copy()
-    img = img.resize((200, 200), Image.LANCZOS)
-    #img = img.convert('L')
-    img = ImageTk.PhotoImage(img)
-    label = Label(window, image=img)
-    label.image = img
-    label.bind('<Configure>', resize_image)
+    label = Label(moodrate, text="Оцените ваше текущее состояние в сфере:", font=("Impact", 24),bg='#D1C1B4',fg='#4D220E')
     label.pack()
-    #label.pack(side=LEFT)
 
-    window.mainloop()
+    def addmood(num,file):
+        f = open(f'files/{file}Mood', 'a')
+        f.write(f'{num} ')
+        f.close()
+
+    back = Button(
+        moodrate,
+        text='Назад',
+        font='Impact 10',
+        bg='#DEB28D',
+        fg='#4D220E',
+        command=close
+    )
+    back.place(x=w - 67, y=5)
+
+    imgcalm = PhotoImage(file='images/calm_pr.png').subsample(3, 3)
+    imgangry = PhotoImage(file='images/angry_pr.png').subsample(3, 3)
+    imgcool = PhotoImage(file='images/cool_pr.png').subsample(3, 3)
+    imghappy = PhotoImage(file='images/happy_pr.png').subsample(3, 3)
+    imgsad = PhotoImage(file='images/sad_pr.png').subsample(3, 3)
+
+    lable_sport = Label(moodrate, text="Спорт", font=("Impact", 20),bg='#D1C1B4',fg='#4D220E')
+    lable_life = Label(moodrate, text="Личная жизнь", font=("Impact", 20),bg='#D1C1B4',fg='#4D220E')
+    lable_family = Label(moodrate, text="Семья", font=("Impact", 20),bg='#D1C1B4',fg='#4D220E')
+
+    lable_sport.place(x=150, y=75)
+    lable_life.place(x=680, y=75)
+    lable_family.place(x=1300, y=75)
 
 
 
+    angry =  Button(
+        moodrate,
+        bg='#D1C1B4',
+        activebackground='#DEB28D',
+        border=0,
+        image=imgangry,
+        command=partial(addmood,'1','Sport')
+    )
+
+    angry.place(x=20,y=130)
+
+    angry = Button(
+        moodrate,
+        bg='#D1C1B4',
+        activebackground='#DEB28D',
+        border=0,
+        image=imgangry,
+        command=partial(addmood, '1', 'Life')
+    )
+
+    angry.place(x=600, y=130)
+
+    angry = Button(
+        moodrate,
+        bg='#D1C1B4',
+        activebackground='#DEB28D',
+        border=0,
+        image=imgangry,
+        command=partial(addmood, '1', 'Family')
+    )
+
+    angry.place(x=1175, y=130)
+
+    sad = Button(
+        moodrate,
+        bg='#D1C1B4',
+        activebackground='#DEB28D',
+        border=0,
+        image=imgsad,
+        command=partial(addmood,'2','Sport')
+    )
+
+    sad.place(x=195, y=250)
+
+    sad = Button(
+        moodrate,
+        bg='#D1C1B4',
+        activebackground='#DEB28D',
+        border=0,
+        image=imgsad,
+        command=partial(addmood, '2', 'Life')
+    )
+
+    sad.place(x=775, y=250)
+
+    sad = Button(
+        moodrate,
+        bg='#D1C1B4',
+        activebackground='#DEB28D',
+        border=0,
+        image=imgsad,
+        command=partial(addmood, '2', 'Family')
+    )
+
+    sad.place(x=1350, y=250)
+
+    calm = Button(
+        moodrate,
+        bg='#D1C1B4',
+        activebackground='#DEB28D',
+        border=0,
+        image=imgcalm,
+        command=partial(addmood,'3', 'Sport')
+    )
+
+    calm.place(x=20, y=400)
+
+    calm = Button(
+        moodrate,
+        bg='#D1C1B4',
+        activebackground='#DEB28D',
+        border=0,
+        image=imgcalm,
+        command=partial(addmood, '3', 'Life')
+    )
+
+    calm.place(x=600, y=400)
+
+    calm = Button(
+        moodrate,
+        bg='#D1C1B4',
+        activebackground='#DEB28D',
+        border=0,
+        image=imgcalm,
+        command=partial(addmood, '3', 'Family')
+    )
+
+    calm.place(x=1175, y=400)
 
 
+    cool = Button(
+        moodrate,
+        bg='#D1C1B4',
+        activebackground='#DEB28D',
+        border=0,
+        image=imgcool,
+        command=partial(addmood,'4', 'Sport')
+    )
 
+    cool.place(x=215, y=500)
+
+    cool = Button(
+        moodrate,
+        bg='#D1C1B4',
+        activebackground='#DEB28D',
+        border=0,
+        image=imgcool,
+        command=partial(addmood, '4', 'Life')
+    )
+
+    cool.place(x=795, y=500)
+
+    cool = Button(
+        moodrate,
+        bg='#D1C1B4',
+        activebackground='#DEB28D',
+        border=0,
+        image=imgcool,
+        command=partial(addmood, '4', 'Family')
+    )
+
+    cool.place(x=1360, y=500)
+
+    happy = Button(
+        moodrate,
+        bg='#D1C1B4',
+        activebackground='#DEB28D',
+        border=0,
+        image=imghappy,
+        command=partial(addmood,'5', 'Sport')
+    )
+
+    happy.place(x=110, y=680)
+
+    happy = Button(
+        moodrate,
+        bg='#D1C1B4',
+        activebackground='#DEB28D',
+        border=0,
+        image=imghappy,
+        command=partial(addmood, '5', 'Life')
+    )
+
+    happy.place(x=690, y=680)
+
+    happy = Button(
+        moodrate,
+        bg='#D1C1B4',
+        activebackground='#DEB28D',
+        border=0,
+        image=imghappy,
+        command=partial(addmood, '5', 'Family')
+    )
+
+    happy.place(x=1265, y=680)
+
+    moodrate.mainloop()
+
+
+def close():
+    window.destroy()
+
+
+'''def set_image(name):
+    canvas.delete("all")
+    #canvas.create_image(100, 115, image=image)
+    img = Image.open(name)
+    img.thumbnail((200, 200), Image.ANTIALIAS)
+    return ImageTk.PhotoImage(img)
+
+def set():
+    set_image('фонjpeg.jpeg')
+
+'''
 w = window.winfo_screenwidth()
 h = window.winfo_screenheight()
 
-window.geometry('400x400+{}+{}'.format(w // 2 - 200, h // 2 - 200))
+window.attributes("-fullscreen", True)
+window['bg']='#D1C1B4'
 
-frame = Frame(
+canvas=Canvas(window,width=w,height=h)
+canvas.config(bg="#848470")
+canvas.pack()
+img = Image.open("img.png")
+img = img.resize((w,h),Image.LANCZOS)
+img = ImageTk.PhotoImage(img)
+canvas.create_image(0, 0, image=img, anchor="nw")
+window.geometry(f"{w}x{h}+0+0")
+
+
+'''frame = Frame(
     window,
     padx=10,
     pady=10
 )
-frame.pack(expand=True)
+frame.pack(expand=True)'''
 
 '''newnote = Label(
     frame,
@@ -315,54 +814,75 @@ frame.pack(expand=True)
 )
 newnote.grid(row=1, column=2)'''
 
+#    #000064 - синий
+
 sport = Button(
-    frame,
+    window,
     text='Спорт',
+    bg='#DEB28D',
+    font='Impact 20',
+    fg='#4D220E',
     command=sport
 )
 personallife = Button(
-    frame,
+    window,
     text='Личная жизнь',
+    bg='#DEB28D',
+    font='Impact 20',
+    fg='#4D220E',
     command=life
 )
 
 family = Button(
-    frame,
+    window,
     text='Семья',
+    bg='#DEB28D',
+    font='Impact 20',
+    fg='#4D220E',
     command=family
 )
 
-sport.grid(row=2, column=1, padx=10)
+'''sport.grid(row=2, column=1, padx=10)
 personallife.grid(row=2, column=2, padx=10)
-family.grid(row=2, column=3, padx=10)
+family.grid(row=2, column=3, padx=10)'''
 
 graphic = Button(
-    frame,
+    window,
     text='График',
+    font='Impact 18',
+    bg='#AF8678',
+    fg='#4D220E',
     command=graf
 )
-graphic.grid(row=4, column=1, pady=20)
+# graphic.grid(row=4, column=1, pady=20)
 
 now = Button(
-    frame,
+    window,
     text="Оценка текущего\nсостояния",
+    font='Impact 18',
+    bg='#AF8678',
+    fg='#4D220E',
+    # command=set
     command=smile
 )
-now.grid(row=4, column=3)
+# now.grid(row=4, column=3)
+
+close = Button(
+    window,
+    text="Закрыть",
+    font='Impact 10',
+    bg='#DEB28D',
+    fg='#4D220E',
+    command=close
+)
+# now.grid(row=w, column=h)
+
+
+sport.place(x=25, y=50)
+family.place(x=25, y=150)
+personallife.place(x=25, y=250)
+graphic.place(x=10, y=h - 175)
+now.place(x=10, y=h - 100)
+close.place(x=w - 67, y=5)
 
 window.mainloop()
-
-
-
-'''spisok=[]
-for filename in os.listdir("files"):
-    new_lst={}
-    with open(os.path.join("files", filename), 'r') as f:
-        text = f.read()
-        for item in text.split('\n'):
-            new_lst[item.split(" ")[0]]=item.split(" ")[-1]
-            print(int(item.split(" ")[-1]) if item.split(" ")[-1] in ['1','2','3'] else item.split(" ")[-1])
-
-        spisok.append(new_lst)
-print(spisok)
-'''
