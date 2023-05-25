@@ -23,6 +23,7 @@ window.title("дневник")
 
 columns = ("situation", "emotion", "think")
 
+<<<<<<< HEAD
 from tksheet import Sheet
 import tkinter as tk
 import textwrap
@@ -33,6 +34,8 @@ import textwrap
 '''def wrap(string, lenght=32):
     return '\n'.join(textwrap.wrap(string, lenght))
 
+=======
+>>>>>>> 261718d4114c8eced93cb362597c37647cd55387
 
 def win(sportwindow, name_file):
     sportwindow.geometry('1000x1000+{}+{}'.format(w // 2 - 400, h // 2 - 400))
@@ -117,11 +120,15 @@ def win(sportwindow, name_file):
     mark_entry = Entry(input_frame)
     mark_entry.grid(row=1, column=4)
 
-    with open(f"files/{name_file}", "r") as f:
+    with open(f"files/{name_file}.txt", "r") as f:
         for i in f.readlines():
             set.insert(parent='', index='end', text='',
+<<<<<<< HEAD
                         values=list(map(wrap,i.split('!'))))
             #print(list(map(wrap,i.split('!'))))
+=======
+                        values=i)
+>>>>>>> 261718d4114c8eced93cb362597c37647cd55387
 
     def input_record():
         if(int(mark_entry.get())<=2):
@@ -133,7 +140,7 @@ def win(sportwindow, name_file):
         sportdata.append([data_entry.get(), situation_entry.get(), emotion_entry.get(), think_entry.get(),
                           mark_entry.get()])
 
-        with open(f"files/{name_file}", "a") as f:
+        with open(f"files/{name_file}.txt", "a") as f:
             for x in sportdata:
                 for y in x:
                     f.write(y)
@@ -280,12 +287,12 @@ def wr(app,name):
                 f.write('\n')
 
 
-
 def sport():
     '''sportwindow = Tk()
     window.withdraw()
     sportwindow.title("Сфера жизни: Спорт")
     win(sportwindow, "Sport")
+<<<<<<< HEAD
     '''
 
     app = demo("Sport")
@@ -317,12 +324,15 @@ def sport():
 
 
 
+=======
+>>>>>>> 261718d4114c8eced93cb362597c37647cd55387
 
 
 def life():
     '''lifew = Tk()
     window.withdraw()
     lifew.title("Сфера жизни: Личная жизнь")
+<<<<<<< HEAD
     win(lifew, "Life")'''
     app = demo("Life")
     app.attributes("-fullscreen", True)
@@ -343,6 +353,9 @@ def life():
     back.place(x=w - 77, y=47)
     app.mainloop()
     wr(app,"Life")
+=======
+    win(lifew, "Life")
+>>>>>>> 261718d4114c8eced93cb362597c37647cd55387
 
 
 def family():
@@ -353,6 +366,7 @@ def family():
     app = demo("Family")
     app.attributes("-fullscreen", True)
 
+<<<<<<< HEAD
     def close():
         # window.deiconify()
         app.destroy()
@@ -441,21 +455,78 @@ def graf():
                                 fg='#4D220E',
                                text="Plot family")
 
+=======
+def graf():
+    grafwind = tk.Toplevel()
+    grafwind.attributes("-fullscreen", True)
+    lable = Label(master=grafwind, text="Отследите изменение вашего эмоционального состояния", font=("Arial", 24))
+    lable.pack()
+
+    def plot(file):
+        places = {'SportMood': [60,150],'FamilyMood': [620,150],'LifeMood': [1190,150],'All': [620,600]}
+
+        fig = Figure(figsize=(3, 3),
+                     dpi=100)
+
+        if file == 'All':
+            sport = list(map(int, open(f'files/SportMood.txt').read().split()))
+            life = list(map(int, open(f'files/LifeMood.txt').read().split()))
+            family = list(map(int, open(f'files/FamilyMood.txt').read().split()))
+            all = [sport, life, family]
+            data = list(map(statistics.mean, all))
+        else:
+            data = list(map(int, open(f'files/{file}.txt').read().split()))
+
+        plot1 = fig.add_subplot(111)
+
+        plot1.plot(data)
+        canvas = FigureCanvasTkAgg(fig,
+                                   master=grafwind)
+        canvas.draw()
+        canvas.get_tk_widget().place(x=places[file][0],y=places[file][1])
+
+        toolbar = NavigationToolbar2Tk(canvas,
+                                       grafwind)
+        toolbar.update()
+
+        canvas.get_tk_widget().place(x=places[file][0],y=places[file][1])
+
+    plot_button_sport = Button(master=grafwind,
+                         command=partial(plot, 'SportMood'),
+                         height=5,
+                         width=30,
+                         text="Plot sport")
+
+    plot_button_sport.place(x=100, y=50)
+
+    plot_button_family = Button(master=grafwind,
+                               command=partial(plot, 'FamilyMood'),
+                               height=5,
+                               width=30,
+                               text="Plot family")
+
+>>>>>>> 261718d4114c8eced93cb362597c37647cd55387
     plot_button_family.place(x=660, y=50)
 
     plot_button_life = Button(master=grafwind,
                                command=partial(plot, 'LifeMood'),
+<<<<<<< HEAD
                               height=2,
                               width=15,
                               bg='#DEB28D',
                               font='Impact 20',
                               fg='#4D220E',
+=======
+                               height=5,
+                               width=30,
+>>>>>>> 261718d4114c8eced93cb362597c37647cd55387
                                text="Plot life")
 
     plot_button_life.place(x=1225, y=50)
 
     plot_button_all = Button(master=grafwind,
                                 command=partial(plot, 'All'),
+<<<<<<< HEAD
                              height=2,
                              width=15,
                              bg='#DEB28D',
@@ -464,6 +535,13 @@ def graf():
                                 text="Plot all")
 
     plot_button_all.place(x=660, y=475)
+=======
+                                height=5,
+                                width=30,
+                                text="Plot all")
+
+    plot_button_all.place(x=660, y=500)
+>>>>>>> 261718d4114c8eced93cb362597c37647cd55387
 
     '''grafframe = Frame(
         grafwind,
@@ -480,8 +558,13 @@ def graf():
         grafwind,
         text='Назад',
         font='Impact 10',
+<<<<<<< HEAD
         bg='#DEB28D',
         fg='#4D220E',
+=======
+        bg='black',
+        fg='white',
+>>>>>>> 261718d4114c8eced93cb362597c37647cd55387
         command=close
     )
 
@@ -557,14 +640,20 @@ def smile():
     # panel1 = Label(window, image=tkimage)
     # panel1.grid(row=0, column=2, sticky=E)
     moodrate = tk.Toplevel()
+<<<<<<< HEAD
     #window.withdraw()
     moodrate.attributes('-fullscreen', True)
     moodrate['bg'] = '#D1C1B4'
+=======
+    window.withdraw()
+    moodrate.attributes('-fullscreen', True)
+>>>>>>> 261718d4114c8eced93cb362597c37647cd55387
     moodrate.title("Оценка состояния")
     moodrate.resizable(0, 0)
 
     def close():
         moodrate.destroy()
+<<<<<<< HEAD
         #window.deiconify()
 
     label = Label(moodrate, text="Оцените ваше текущее состояние в сфере:", font=("Impact", 24),bg='#D1C1B4',fg='#4D220E')
@@ -572,6 +661,15 @@ def smile():
 
     def addmood(num,file):
         f = open(f'files/{file}Mood', 'a')
+=======
+        window.deiconify()
+
+    label = Label(moodrate, text="Оцените ваше текущее состояние в сфере:", font=("Arial", 24))
+    label.pack()
+
+    def addmood(num,file):
+        f = open(f'files/{file}Mood.txt', 'a')
+>>>>>>> 261718d4114c8eced93cb362597c37647cd55387
         f.write(f'{num} ')
         f.close()
 
@@ -579,12 +677,18 @@ def smile():
         moodrate,
         text='Назад',
         font='Impact 10',
+<<<<<<< HEAD
         bg='#DEB28D',
         fg='#4D220E',
+=======
+        bg='black',
+        fg='white',
+>>>>>>> 261718d4114c8eced93cb362597c37647cd55387
         command=close
     )
     back.place(x=w - 67, y=5)
 
+<<<<<<< HEAD
     imgcalm = PhotoImage(file='images/calm_pr.png').subsample(3, 3)
     imgangry = PhotoImage(file='images/angry_pr.png').subsample(3, 3)
     imgcool = PhotoImage(file='images/cool_pr.png').subsample(3, 3)
@@ -611,6 +715,95 @@ def smile():
     )
 
     angry.place(x=20,y=130)
+=======
+    imgcalm = PhotoImage(file='images/calm.png').subsample(2, 2)
+    imgangry = PhotoImage(file='images/angry.png').subsample(2, 2)
+    imgcool = PhotoImage(file='images/cool.png').subsample(2, 2)
+    imghappy = PhotoImage(file='images/happy.png').subsample(2, 2)
+    imgsad = PhotoImage(file='images/sad.png').subsample(2, 2)
+
+    lable_sport = Label(moodrate, text="Спорт", font=("Arial", 20))
+    lable_life = Label(moodrate, text="Личная жизнь", font=("Arial", 20))
+    lable_family = Label(moodrate, text="Семья", font=("Arial", 20))
+
+    lable_sport.place(x=150, y=100)
+    lable_life.place(x=680, y=100)
+    lable_family.place(x=1300, y=100)
+
+
+
+    angry = Button(
+        moodrate,
+        image=imgangry,
+        command=partial(addmood,'1','Sport')
+    )
+
+    angry.place(x=110,y=140)
+
+    angry = Button(
+        moodrate,
+        image=imgangry,
+        command=partial(addmood, '1', 'Life')
+    )
+
+    angry.place(x=690, y=140)
+
+    angry = Button(
+        moodrate,
+        image=imgangry,
+        command=partial(addmood, '1', 'Family')
+    )
+
+    angry.place(x=1265, y=140)
+
+    sad = Button(
+        moodrate,
+        image=imgsad,
+        command=partial(addmood,'2','Sport')
+    )
+
+    sad.place(x=110, y=320)
+
+    sad = Button(
+        moodrate,
+        image=imgsad,
+        command=partial(addmood, '2', 'Life')
+    )
+
+    sad.place(x=690, y=320)
+
+    sad = Button(
+        moodrate,
+        image=imgsad,
+        command=partial(addmood, '2', 'Family')
+    )
+
+    sad.place(x=1265, y=320)
+
+    calm = Button(
+        moodrate,
+        image=imgcalm,
+        command=partial(addmood,'3', 'Sport')
+    )
+
+    calm.place(x=110, y=320)
+
+    calm = Button(
+        moodrate,
+        image=imgcalm,
+        command=partial(addmood, '3', 'Life')
+    )
+
+    calm.place(x=690, y=320)
+
+    calm = Button(
+        moodrate,
+        image=imgcalm,
+        command=partial(addmood, '3', 'Family')
+    )
+
+    calm.place(x=1265, y=320)
+>>>>>>> 261718d4114c8eced93cb362597c37647cd55387
 
     angry = Button(
         moodrate,
@@ -621,6 +814,7 @@ def smile():
         command=partial(addmood, '1', 'Life')
     )
 
+<<<<<<< HEAD
     angry.place(x=600, y=130)
 
     angry = Button(
@@ -765,6 +959,54 @@ def smile():
         command=partial(addmood, '5', 'Family')
     )
 
+=======
+    cool = Button(
+        moodrate,
+        image=imgcool,
+        command=partial(addmood,'4', 'Sport')
+    )
+
+    cool.place(x=110, y=500)
+
+    cool = Button(
+        moodrate,
+        image=imgcool,
+        command=partial(addmood, '4', 'Life')
+    )
+
+    cool.place(x=690, y=500)
+
+    cool = Button(
+        moodrate,
+        image=imgcool,
+        command=partial(addmood, '4', 'Family')
+    )
+
+    cool.place(x=1265, y=500)
+
+    happy = Button(
+        moodrate,
+        image=imghappy,
+        command=partial(addmood,'5', 'Sport')
+    )
+
+    happy.place(x=110, y=680)
+
+    happy = Button(
+        moodrate,
+        image=imghappy,
+        command=partial(addmood, '5', 'Life')
+    )
+
+    happy.place(x=690, y=680)
+
+    happy = Button(
+        moodrate,
+        image=imghappy,
+        command=partial(addmood, '5', 'Family')
+    )
+
+>>>>>>> 261718d4114c8eced93cb362597c37647cd55387
     happy.place(x=1265, y=680)
 
     moodrate.mainloop()
@@ -789,6 +1031,7 @@ w = window.winfo_screenwidth()
 h = window.winfo_screenheight()
 
 window.attributes("-fullscreen", True)
+<<<<<<< HEAD
 window['bg']='#D1C1B4'
 
 canvas=Canvas(window,width=w,height=h)
@@ -799,6 +1042,17 @@ img = img.resize((w,h),Image.LANCZOS)
 img = ImageTk.PhotoImage(img)
 canvas.create_image(0, 0, image=img, anchor="nw")
 window.geometry(f"{w}x{h}+0+0")
+=======
+
+# canvas=Canvas(window,width=w,height=h)
+# canvas.config(bg="#848470")
+# canvas.pack()
+# img = Image.open("images\фонjpeg.jpeg")
+# img = img.resize((w,h),Image.LANCZOS)
+# img = ImageTk.PhotoImage(img)
+# canvas.create_image(0, 0, image=img, anchor="nw")
+# window.geometry(f"{w}x{h}+0+0")
+>>>>>>> 261718d4114c8eced93cb362597c37647cd55387
 
 
 '''frame = Frame(
@@ -819,26 +1073,44 @@ newnote.grid(row=1, column=2)'''
 sport = Button(
     window,
     text='Спорт',
+<<<<<<< HEAD
     bg='#DEB28D',
     font='Impact 20',
     fg='#4D220E',
+=======
+    bg='#FF0000',
+    font='Impact 20',
+    fg='black',
+>>>>>>> 261718d4114c8eced93cb362597c37647cd55387
     command=sport
 )
 personallife = Button(
     window,
     text='Личная жизнь',
+<<<<<<< HEAD
     bg='#DEB28D',
     font='Impact 20',
     fg='#4D220E',
+=======
+    bg='#00FF00',
+    font='Impact 20',
+    fg='black',
+>>>>>>> 261718d4114c8eced93cb362597c37647cd55387
     command=life
 )
 
 family = Button(
     window,
     text='Семья',
+<<<<<<< HEAD
     bg='#DEB28D',
     font='Impact 20',
     fg='#4D220E',
+=======
+    bg='#FFFF00',
+    font='Impact 20',
+    fg='black',
+>>>>>>> 261718d4114c8eced93cb362597c37647cd55387
     command=family
 )
 
@@ -850,8 +1122,13 @@ graphic = Button(
     window,
     text='График',
     font='Impact 18',
+<<<<<<< HEAD
     bg='#AF8678',
     fg='#4D220E',
+=======
+    bg='black',
+    fg='white',
+>>>>>>> 261718d4114c8eced93cb362597c37647cd55387
     command=graf
 )
 # graphic.grid(row=4, column=1, pady=20)
@@ -860,8 +1137,13 @@ now = Button(
     window,
     text="Оценка текущего\nсостояния",
     font='Impact 18',
+<<<<<<< HEAD
     bg='#AF8678',
     fg='#4D220E',
+=======
+    bg='black',
+    fg='white',
+>>>>>>> 261718d4114c8eced93cb362597c37647cd55387
     # command=set
     command=smile
 )
@@ -871,8 +1153,13 @@ close = Button(
     window,
     text="Закрыть",
     font='Impact 10',
+<<<<<<< HEAD
     bg='#DEB28D',
     fg='#4D220E',
+=======
+    bg='black',
+    fg='white',
+>>>>>>> 261718d4114c8eced93cb362597c37647cd55387
     command=close
 )
 # now.grid(row=w, column=h)
@@ -885,4 +1172,8 @@ graphic.place(x=10, y=h - 175)
 now.place(x=10, y=h - 100)
 close.place(x=w - 67, y=5)
 
+<<<<<<< HEAD
 window.mainloop()
+=======
+window.mainloop()
+>>>>>>> 261718d4114c8eced93cb362597c37647cd55387
